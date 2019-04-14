@@ -1,3 +1,4 @@
+# coding: utf-8
 module RSpotify
 
   # @attr [String] birthdate       The user's date-of-birth. This field is only available when the current user has granted access to the *user-read-birthdate* scope.
@@ -10,6 +11,29 @@ module RSpotify
   # @attr [String] product         The user's Spotify subscription level: "premium", "free", etc. This field is only available when the current user has granted access to the *user-read-private* scope.
   # @attr [Hash]   tracks_added_at A hash containing the date and time each track was saved by the user. Note: the hash is filled and updated only when {#saved_tracks} is used.
   class User < Base
+    MockTrack = Struct.new(:id) do
+      alias_method :spotify_id, :id
+    end unless defined?(MockTrack)
+
+    stream_methods playlists: 50,
+                   saved_tracks: 50,
+                   saved_albums: 50,
+                   top_tracks: 50,
+                   top_artists: 50
+
+    def in_library?(tracks)
+      return [].to_enum if tracks.none?
+
+      Enumerator.new do |generator|
+        tracks.each_slice(50) do |batch|
+          batch = batch.map(&:spotify_id) if batch.first.respond_to?(:spotify_id)
+          batch = batch.map { |track_id| MockTrack.new(track_id) }
+          saved_tracks?(batch).each do |saved|
+            generator << saved
+          end
+        end
+      end.lazy
+    end
 
     # Returns User object with id provided
     #

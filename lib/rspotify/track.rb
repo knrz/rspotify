@@ -16,6 +16,42 @@ module RSpotify
   # @attr [Boolean]       is_playable       Whether or not the track is playable in the given market. Only present when track relinking is applied by specifying a market when looking up the track
   # @attr [TrackLink]     linked_from       Details of the requested track. Only present when track relinking is applied and the returned track is different to the one requested because the latter is not available in the given market
   class Track < Base
+    include ::RSpotify::CustomExtensions::Caching
+
+    def initialize(options = {})
+      @available_markets = options['available_markets']
+      @disc_number       = options['disc_number']
+      @duration_ms       = options['duration_ms']
+      @explicit          = options['explicit']
+      @external_ids      = options['external_ids']
+      @uri               = options['uri']
+      @name              = options['name']
+      @popularity        = options['popularity']
+      @preview_url       = options['preview_url']
+      @track_number      = options['track_number']
+      @played_at         = options['played_at']
+      @context_type      = options['context_type']
+      @is_playable       = options['is_playable']
+
+      @album = ::RSpotify::Album.new(options['album']) if options['album']
+      @artists = options['artists']&.map { |artist| ::RSpotify::Artist.new(artist) }
+      @linked_from = ::RSpotify::TrackLink.new(options['linked_from']) if options['linked_from']
+      @added_at = options['added_at']
+
+      super(options)
+    end
+
+    def artist
+      artists.first
+    end
+
+    def human_sort_key
+      [album.id.to_s, disc_number.to_i, track_number.to_i]
+    end
+
+    def genres
+      album.artists.flat_map(&:genres)
+    end
 
     # Returns Track object(s) with id(s) provided
     #
@@ -27,7 +63,7 @@ module RSpotify
     #           track = RSpotify::Track.find('2UzMpPKPhbcC8RbsmuURAZ')
     #           track.class #=> RSpotify::Track
     #           track.name  #=> "Do I Wanna Know?"
-    #           
+    #
     #           ids = %w(2UzMpPKPhbcC8RbsmuURAZ 7Jzsc04YpkRwB1zeyM39wE)
     #           tracks = RSpotify::Base.find(ids, 'track')
     #           tracks.class       #=> Array
@@ -56,37 +92,7 @@ module RSpotify
 
     # Retrieves the audio features for the track
     def audio_features
-      RSpotify::AudioFeatures.find(@id)
-    end
-
-    def initialize(options = {})
-      @available_markets = options['available_markets']
-      @disc_number       = options['disc_number']
-      @duration_ms       = options['duration_ms']
-      @explicit          = options['explicit']
-      @external_ids      = options['external_ids']
-      @uri               = options['uri']
-      @name              = options['name']
-      @popularity        = options['popularity']
-      @preview_url       = options['preview_url']
-      @track_number      = options['track_number']
-      @played_at         = options['played_at']
-      @context_type      = options['context_type']
-      @is_playable       = options['is_playable']
-
-      @album = if options['album']
-        Album.new options['album']
-      end
-
-      @artists = if options['artists']
-        options['artists'].map { |a| Artist.new a }
-      end
-
-      @linked_from = if options['linked_from']
-        TrackLink.new options['linked_from']
-      end
-
-      super(options)
+      @audio_features ||= RSpotify::AudioFeatures.find(@id)
     end
   end
 end

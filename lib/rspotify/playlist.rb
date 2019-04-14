@@ -1,3 +1,4 @@
+# coding: utf-8
 module RSpotify
 
   # @attr [Boolean]     collaborative   true if the owner allows other users to modify the playlist
@@ -13,6 +14,18 @@ module RSpotify
   # @attr [Hash]        tracks_added_by A hash containing the user that added each track to the playlist. Note: the hash is updated only when {#tracks} is used.
   # @attr [Hash]        tracks_is_local A hash showing whether each track is local or not. Note: the hash is updated only when {#tracks} is used.
   class Playlist < Base
+    include ::RSpotify::CustomExtensions::Stream
+    stream_methods tracks: 50
+
+    def tracks=(tracks)
+      per_request_limit = 100
+      all_tracks.each_slice(per_request_limit) do |batch|
+        remove_tracks!(batch)
+      end
+      tracks.each_slice(per_request_limit).with_index(0) do |batch, index|
+        add_tracks!(batch, position: index * per_request_limit)
+      end
+    end
 
     # Get a list of Spotify featured playlists (shown, for example, on a Spotify player’s “Browse” tab).
     #

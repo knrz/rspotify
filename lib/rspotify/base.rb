@@ -6,6 +6,11 @@ module RSpotify
   # @attr [String] type          The object type (artist, album, etc.)
   # @attr [String] uri           The {https://developer.spotify.com/web-api/user-guide/#spotify-uris-and-ids Spotify URI} for the object
   class Base
+    include ::RSpotify::CustomExtensions::Stream
+
+    def spotify_id
+      id
+    end
 
     # Returns RSpotify object(s) with id(s) and type provided
     #
@@ -30,7 +35,6 @@ module RSpotify
           warn 'Spotify API does not support finding several users simultaneously'
           return false
         end
-        limit = (type == 'album' ? 20 : 50)
         find_many(ids, type, market: market)
       when String
         id = ids
@@ -143,7 +147,7 @@ module RSpotify
         frameborder: 0,
         allowtransparency: true,
         view: nil,
-        theme: nil,
+        theme: nil
       }
       options = default_options.merge(options)
 

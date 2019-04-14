@@ -1,3 +1,4 @@
+# coding: utf-8
 module RSpotify
 
   # @attr [String]        album_type             The type of the album (album, single, compilation)
@@ -14,6 +15,9 @@ module RSpotify
   # @attr [String]        release_date_precision The precision with which release_date value is known: "year", "month", or "day"
   # @attr [Integer]       total_tracks           The total number of tracks in the album
   class Album < Base
+    include ::RSpotify::CustomExtensions::Stream
+    include ::RSpotify::CustomExtensions::Caching
+    stream_methods tracks: 50
 
     # Returns Album object(s) with id(s) provided
     #

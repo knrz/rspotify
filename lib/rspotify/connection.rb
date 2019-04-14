@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'addressable'
 require 'base64'
 require 'json'
@@ -6,10 +8,14 @@ require 'restclient'
 module RSpotify
   class MissingAuthentication < StandardError; end
 
-  API_URI       = 'https://api.spotify.com/v1/'.freeze
-  AUTHORIZE_URI = 'https://accounts.spotify.com/authorize'.freeze
-  TOKEN_URI     = 'https://accounts.spotify.com/api/token'.freeze
-  VERBS         = %w(get post put delete)
+  begin
+    API_URI       = 'https://api.spotify.com/v1/'
+    AUTHORIZE_URI = 'https://accounts.spotify.com/authorize'
+    TOKEN_URI     = 'https://accounts.spotify.com/api/token'
+    VERBS         = %w[get post put delete].freeze
+  end unless defined?(API_URI) && defined?(AUTHORIZE_URI) && defined?(TOKEN_URI) && defined?(VERBS)
+
+  # frozen_string_literal: true
 
   class << self
     attr_accessor :raw_response
@@ -40,10 +46,48 @@ module RSpotify
       end
     end
 
+    attr_accessor :store_record, :cache_ttl, :store_ttl
+
+    def get_without_cache(path, *params)
+      params << { 'Authorization' => "Bearer #{client_token}" } if client_token
+      send_request('get', path, *params)
+    end
+
+    def get_with_cache(path)
+      cache_miss = false
+      result = Rails.cache.fetch(path, expires_in: cache_ttl) do
+        cache_miss = true
+
+        if (response = get_from_store(path)).present?
+          Rails.logger.debug('Store hit', path: path)
+          return response
+        end
+
+        response = get_without_cache(path) # call the original get method
+        store_record.upsert!(path: path, response: response)
+        Rails.logger.debug('Store upsert', path: path)
+        response
+      end
+      Rails.logger.debug('Cache hit', path: path) unless cache_miss
+      result
+    end
+
+    def get_from_store(path)
+      store_record
+        .where(path: path)
+        .where('updated_at >= ?', store_ttl.ago)
+        .limit(1)
+        .pluck(:response)
+        .first
+    end
+
+    alias get get_with_cache
+
+
     def resolve_auth_request(user_id, url)
       users_credentials = if User.class_variable_defined?('@@users_credentials')
-        User.class_variable_get('@@users_credentials')
-      end
+                            User.class_variable_get('@@users_credentials')
+                          end
 
       if users_credentials && users_credentials[user_id]
         User.oauth_get(user_id, url)
@@ -88,16 +132,14 @@ module RSpotify
 
     def request_was_user_authenticated?(*params)
       users_credentials = if User.class_variable_defined?('@@users_credentials')
-        User.class_variable_get('@@users_credentials')
-      end
+                            User.class_variable_get('@@users_credentials')
+                          end
 
       headers = get_headers(params)
       if users_credentials
-        creds = users_credentials.map{|_user_id, creds| "Bearer #{creds['token']}"}
+        creds = users_credentials.map { |_user_id, creds| "Bearer #{creds['token']}" }
 
-        if creds.include?(headers['Authorization'])
-          return true
-        end
+        return creds.include?(headers['Authorization'])
       end
 
       false
@@ -109,7 +151,7 @@ module RSpotify
     end
 
     def get_headers(params)
-      params.find{|param| param.is_a?(Hash) && param['Authorization']}
+      params.find { |param| param.is_a?(Hash) && param['Authorization'] }
     end
   end
 end
