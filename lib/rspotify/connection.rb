@@ -15,11 +15,10 @@ module RSpotify
     VERBS         = %w[get post put delete].freeze
   end unless defined?(API_URI) && defined?(AUTHORIZE_URI) && defined?(TOKEN_URI) && defined?(VERBS)
 
-  # frozen_string_literal: true
-
   class << self
     attr_accessor :raw_response
-    attr_reader :client_token
+    attr_accessor :client_id, :client_secret, :client_token
+    attr_accessor :store_record, :cache_ttl, :store_ttl
 
     # Authenticates access to restricted data. Requires {https://developer.spotify.com/my-applications user credentials}
     #
@@ -46,8 +45,6 @@ module RSpotify
       end
     end
 
-    attr_accessor :store_record, :cache_ttl, :store_ttl
-
     def get_without_cache(path, *params)
       params << { 'Authorization' => "Bearer #{client_token}" } if client_token
       send_request('get', path, *params)
@@ -64,7 +61,7 @@ module RSpotify
         end
 
         response = get_without_cache(path) # call the original get method
-        store_record.upsert!(path: path, response: response)
+        store_record&.upsert!(path: path, response: response)
         Rails.logger.debug('Store upsert', path: path)
         response
       end
@@ -73,16 +70,15 @@ module RSpotify
     end
 
     def get_from_store(path)
-      store_record
-        .where(path: path)
-        .where('updated_at >= ?', store_ttl.ago)
-        .limit(1)
-        .pluck(:response)
+      store_record&
+        .where(path: path)&
+        .where('updated_at >= ?', store_ttl.ago)&
+        .limit(1)&
+        .pluck(:response)&
         .first
     end
 
     alias get get_with_cache
-
 
     def resolve_auth_request(user_id, url)
       users_credentials = if User.class_variable_defined?('@@users_credentials')
@@ -136,13 +132,7 @@ module RSpotify
                           end
 
       headers = get_headers(params)
-      if users_credentials
-        creds = users_credentials.map { |_user_id, creds| "Bearer #{creds['token']}" }
-
-        return creds.include?(headers['Authorization'])
-      end
-
-      false
+      !!users_credentials&.any? { |_user_id, creds| "Bearer #{creds['token']}" == headers['Authorization'] }
     end
 
     def auth_header

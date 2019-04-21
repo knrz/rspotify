@@ -53,6 +53,10 @@ module RSpotify
       album.artists.flat_map(&:genres)
     end
 
+    def related?(other_track)
+      album.id == other_track.album.id || (artists.map(&:id) & other_track.artists.map(&:id)).any?
+    end
+
     # Returns Track object(s) with id(s) provided
     #
     # @param ids [String, Array] Maximum: 50 IDs
