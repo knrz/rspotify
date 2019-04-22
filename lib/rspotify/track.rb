@@ -53,8 +53,8 @@ module RSpotify
       album.artists.flat_map(&:genres)
     end
 
-    def related?(other_track)
-      album.id == other_track.album.id || (artists.map(&:id) & other_track.artists.map(&:id)).any?
+    def clustering_vector
+      RSpotify::DistanceMetrics::TrackVector.new(self)
     end
 
     # Returns Track object(s) with id(s) provided

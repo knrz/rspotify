@@ -15,6 +15,7 @@ class RSpotify
   autoload :Track,              'rspotify/track'
   autoload :TrackLink,          'rspotify/track_link'
   autoload :User,               'rspotify/user'
+  autoload :DistanceMetrics,    'rspotify/distance_metrics'
 
   def self.find(uris)
     if uris.respond_to?(:first)
