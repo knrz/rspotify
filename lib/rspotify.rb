@@ -1,7 +1,7 @@
 require 'rspotify/connection'
 require 'rspotify/version'
 
-class RSpotify
+module RSpotify
   autoload :Album,              'rspotify/album'
   autoload :Artist,             'rspotify/artist'
   autoload :AudioFeatures,      'rspotify/audio_features'

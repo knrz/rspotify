@@ -1,3 +1,3 @@
 module RSpotify
-  VERSION = '3.0.1'.freeze unless defined?(VERSION)
+  VERSION = '3.0.2'.freeze unless defined?(VERSION)
 end
