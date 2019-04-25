@@ -70,12 +70,7 @@ module RSpotify
     end
 
     def get_from_store(path)
-      store_record&
-        .where(path: path)&
-        .where('updated_at >= ?', store_ttl.ago)&
-        .limit(1)&
-        .pluck(:response)&
-        .first
+      store_record&.where(path: path)&.where('updated_at >= ?', store_ttl.ago)&.limit(1)&.pluck(:response)&.first
     end
 
     alias get get_with_cache
