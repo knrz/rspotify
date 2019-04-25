@@ -17,7 +17,6 @@ module RSpotify
   autoload :User,               'rspotify/user'
   autoload :DistanceMetrics,    'rspotify/distance_metrics'
   autoload :Extensions,         'rspotify/extensions'
-  autoload :Extensions
 
   def self.parse_url(url)
     parts = URI(url).path[1..-1].split("/")
