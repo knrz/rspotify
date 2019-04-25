@@ -15,8 +15,8 @@ module RSpotify
   # @attr [String]        release_date_precision The precision with which release_date value is known: "year", "month", or "day"
   # @attr [Integer]       total_tracks           The total number of tracks in the album
   class Album < Base
-    include ::RSpotify::CustomExtensions::Stream
-    include ::RSpotify::CustomExtensions::FindCache
+    include ::RSpotify::Extensions::Stream
+    include ::RSpotify::Extensions::FindCache
     stream_methods tracks: 50
 
     # Returns Album object(s) with id(s) provided

@@ -6,7 +6,7 @@ module RSpotify
   # @attr [String] type          The object type (artist, album, etc.)
   # @attr [String] uri           The {https://developer.spotify.com/web-api/user-guide/#spotify-uris-and-ids Spotify URI} for the object
   class Base
-    include ::RSpotify::CustomExtensions::Stream
+    include ::RSpotify::Extensions::Stream
 
     def spotify_id
       id

@@ -7,8 +7,8 @@ module RSpotify
   # @attr [String]        name       The name of the artist
   # @attr [Integer]       popularity The popularity of the artist. The value will be between 0 and 100, with 100 being the most popular
   class Artist < Base
-    include ::RSpotify::CustomExtensions::Stream
-    include ::RSpotify::CustomExtensions::FindCache
+    include ::RSpotify::Extensions::Stream
+    include ::RSpotify::Extensions::FindCache
     stream_methods albums: 50
 
     # Returns Artist object(s) with id(s) provided

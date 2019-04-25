@@ -14,7 +14,7 @@ module RSpotify
   # @attr [Hash]        tracks_added_by A hash containing the user that added each track to the playlist. Note: the hash is updated only when {#tracks} is used.
   # @attr [Hash]        tracks_is_local A hash showing whether each track is local or not. Note: the hash is updated only when {#tracks} is used.
   class Playlist < Base
-    include ::RSpotify::CustomExtensions::Stream
+    include ::RSpotify::Extensions::Stream
     stream_methods tracks: 50
 
     def tracks=(tracks)

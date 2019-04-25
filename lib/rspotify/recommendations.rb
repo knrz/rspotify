@@ -4,7 +4,7 @@ module RSpotify
   # @attr [Array<Track>]              tracks An array of {https://developer.spotify.com/web-api/object-model/#track-object-simplified track object (simplified)} ordered according to the parameters supplied.
   # @attr [Array<RecommendationSeed>] seeds An array of {https://developer.spotify.com/web-api/object-model/#recommendations-seed-object recommendation seed objects}.
   class Recommendations < Base
-    include ::RSpotify::CustomExtensions::AutoCache
+    include ::RSpotify::Extensions::AutoCache
 
     # Retrieve a list of available genres seed parameter values for recommendations.
     # @return [Array<String>]

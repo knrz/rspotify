@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module RSpotify
-  module CustomExtensions
+  module Extensions
     module Stream
       extend ActiveSupport::Concern
 
