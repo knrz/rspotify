@@ -1,7 +1,7 @@
 module RSpotify
   module Extensions
-    autoload :AutoCache, 'extensions/auto_cache'
-    autoload :FindCache, 'extensions/find_cache'
-    autoload :Stream, 'extensions/stream'
+    require_relative 'extensions/auto_cache'
+    require_relative 'extensions/find_cache'
+    require_relative 'extensions/stream'
   end
 end

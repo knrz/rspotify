@@ -410,6 +410,5 @@ module RSpotify
       @snapshot_id = nil
       tracks
     end
-
   end
 end
