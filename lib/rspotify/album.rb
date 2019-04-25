@@ -16,7 +16,7 @@ module RSpotify
   # @attr [Integer]       total_tracks           The total number of tracks in the album
   class Album < Base
     include ::RSpotify::CustomExtensions::Stream
-    include ::RSpotify::CustomExtensions::Caching
+    include ::RSpotify::CustomExtensions::FindCache
     stream_methods tracks: 50
 
     # Returns Album object(s) with id(s) provided

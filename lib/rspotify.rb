@@ -16,6 +16,7 @@ module RSpotify
   autoload :TrackLink,          'rspotify/track_link'
   autoload :User,               'rspotify/user'
   autoload :DistanceMetrics,    'rspotify/distance_metrics'
+  autoload :CustomExtensions,   'rspotify/custom_extensions'
 
   def self.find(uris)
     if uris.respond_to?(:first)
@@ -23,8 +24,8 @@ module RSpotify
       ids = uris.map { |uri| uri.split(':').last }
       RSpotify.const_get(type.classify).find(ids)
     else
-      _, type, id = uris.split(':')
-      RSpotify.const_get(type.classify).find(id)
+      _, type, *parts = uris.split(':')
+      RSpotify.const_get(type.classify).find(*parts)
     end
   end
 end

@@ -16,7 +16,7 @@ module RSpotify
   # @attr [Boolean]       is_playable       Whether or not the track is playable in the given market. Only present when track relinking is applied by specifying a market when looking up the track
   # @attr [TrackLink]     linked_from       Details of the requested track. Only present when track relinking is applied and the returned track is different to the one requested because the latter is not available in the given market
   class Track < Base
-    include ::RSpotify::CustomExtensions::Caching
+    include ::RSpotify::CustomExtensions::FindCache
 
     def initialize(options = {})
       @available_markets = options['available_markets']
