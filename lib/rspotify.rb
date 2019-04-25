@@ -27,13 +27,18 @@ module RSpotify
 
   def self.find(urls)
     grouped = Array(urls).
-                map { |url| parse_url(url) }.
+                map { |url| RSpotify.parse_url(url) }.
                 group_by(&:first).
-                transform_values(&:last)
-    response = grouped.map do |type, id|
-      [type, RSpotify.const_get(type.classify).find(*id)]
+                transform_values { |values| values.map(&:last) }
+    response = grouped.map do |type, ids|
+      resource = RSpotify.const_get(type.classify)
+      [type, ids.map { |id| resource.find(*id) }]
     end
-    return response.first.last if response.count == 1
-    response.to_h
+    if response.count == 1
+      response = response.first.last
+      response.try(:count) == 1 ? response.first : response
+    else
+      response.to_h
+    end
   end
 end
